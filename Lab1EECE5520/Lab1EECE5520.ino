@@ -4,6 +4,14 @@
 // This program is designed to simulate the timing and execution of a traffic light system.
 // For the graduate section, this program will execute faster light blinking, intersection traffic lights, and a 7 segment display for the timer.
 
+//Sources used
+// https://projecthub.arduino.cc/dmytrosavchuk/adjustable-countdown-timer-382ea8
+// https://docs.arduino.cc/built-in-examples/digital/Debounce
+// https://www.ardumotive.com/how-to-use-a-buzzer-en.html
+// https://projecthub.arduino.cc/SAnwandter1/programming-4-digit-7-segment-led-display-5c4617
+// https://projecthub.arduino.cc/FalcomDigital/2-way-intersection-with-pedestrian-walk-cycle-ad2ef0
+// Elegoo BASIC STARTERKIT TUTORIAL FOR MEGA 2560 tutorials and lessons PDF document
+
 #include <math.h>
 
 //timer setup for timer0, timer1, and timer2.
