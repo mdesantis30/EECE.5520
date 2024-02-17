@@ -150,9 +150,9 @@ ISR(TIMER1_COMPA_vect){//timer1 interrupt 1Hz toggles pin 13 (LED)
   
 void loop(){
   digitalWrite(redLED3Pin,HIGH); // turn the LED on (HIGH is the voltage level) 
-  delay(1000); // wait for a second
+  delay(500); // wait for a second
   digitalWrite(redLED3Pin, LOW); // turn the LED off by making the voltage LOW
-  delay(1000); // wait for a second   
+  delay(500); // wait for a second   
   
   //read button state into variable "read1"
   int read1 = digitalRead(buttonPin);
@@ -179,6 +179,7 @@ void loop(){
 
   // set the red LED to a constant on state for 15 seconds
   digitalWrite(redLED3Pin, iLEDState);
+  digitalWrite(redLED6Pin, iLEDState);
   delay(150000);
   
   //Traffic light set 1
@@ -191,6 +192,7 @@ void loop(){
   delay(3000);        // ...for 1 sec
   noTone(buzzer);     // Stop sound...
   delay(1000);        // ...for 1sec
+  //replace buzzer code with a function call
 
   digitalWrite(greenLED1Pin, LOW);
   digitalWrite(yellowLED2Pin, HIGH);
@@ -201,7 +203,13 @@ void loop(){
   delay(1000);        // ...for 1sec
 
   //Traffic light set 2
-
+    //both red LEDs start on
+    //then green LED in set 1 turns on, and red LED in set 2 stays off
+    //when green LED in set 1 approaches yellow, turn on buzzer, remain in yellow for 3 seconds, then go to red.
+    //add short delay to red LED in set 1, then turn on green LED in set 2 on
+    //transition from green LED high in set 2 to yellow LED high in set 2
+    //transition from yellow to red in set 2
+    //repeat cycle
 
 
   //loop for program
@@ -212,6 +220,10 @@ void loop(){
 
 }
 
+//MAKE SURE TO CHANGE PINS FOR COUNTDOWN TIMER 
+//MAKE SURE TO REMOVE BUZZER FOR THIS PART
+//MAKE SURE TO BUILD THE HARDWARE FOR THIS PART
+
 //everything written below is for the countdown timer, buzzer, and 7-segment display
 void  playTone(int tone, int duration) {
   for (long k = 0; k < duration * 1000L; k  += tone * 2) {  
@@ -221,6 +233,7 @@ void  playTone(int tone, int duration) {
     delayMicroseconds(tone);
   }
 }
+//REPLACE THE BUZZER WITH THIS FUNCTION, OR REMOVE THIS SPEAKER FUNCTION ENTIRELY
 
 void  lightNumber(int numberToDisplay) {
   #define SEGMENT_ON  HIGH
