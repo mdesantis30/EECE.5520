@@ -12,9 +12,6 @@ void setup() // Set the three shift register pins as output
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
-
-  // Start with the clockPin set to a LOW state
-  digitalWrite(clockPin, LOW);
 }
 
 // Function to be called in the traffic lights loop each time an LED needs to blink for the last 3 seconds
