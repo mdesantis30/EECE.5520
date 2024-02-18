@@ -1,0 +1,46 @@
+// Lab #1: Traffic Light Controller
+//Matthew DeSantis and Ryan Mouhib, EECE.5520
+// This lab is to design a controller for 2 traffic lights with 4 lights each: Red, Yellow, Green, Green-Left-Arrow.
+// The R-GLA-G-Y pattern continues until the system is powered off, an active buzzer beeps for 3 seconds before a light is changed.
+
+int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
+int clockPin = 9;      // (9) SH_CP [SCK] on 74HC595
+int dataPin = 12;     // (12) DS [S1] on 74HC595
+
+void setup() // Set the three shift register pins as output
+{
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
+
+  // Start with the clockPin set to a LOW state
+  digitalWrite(clockPin, LOW);
+}
+
+void loop() {
+  // GLA on for both traffic lights
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00011000);
+  digitalWrite(latchPin, HIGH);
+  delay(5000);  // GLA stays on for 5 seconds
+
+  // Green on for both traffic lights
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00100100);
+  digitalWrite(latchPin, HIGH);
+  delay(12000); // Green stays on for 12 seconds
+
+  // Yellow on for both traffic lights
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b01000010);
+  digitalWrite(latchPin, HIGH);
+  delay(3000);  // Yellow stays on for 3 seconds
+
+// Red on for both traffic lights
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b10000001);
+  digitalWrite(latchPin, HIGH);
+  delay(20000); // Red stays on for 20 seconds
+}
+
+// Source: Elegoo Super Starter Kit forUNO, Lesson 16 Eight LED with 74HC595
