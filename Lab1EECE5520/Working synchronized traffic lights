@@ -1,0 +1,71 @@
+// Lab #1: Traffic Light Controller
+//Matthew DeSantis and Ryan Mouhib, EECE.5520
+// This lab is to design a controller for 2 traffic lights with 4 lights each: Red, Yellow, Green, Green-Left-Arrow.
+// The R-GLA-G-Y pattern continues until the system is powered off, an active buzzer beeps for 3 seconds before a light is changed.
+
+int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
+int clockPin = 9;      // (9) SH_CP [SCK] on 74HC595
+int dataPin = 12;     // (12) DS [S1] on 74HC595
+
+void setup() // Set the three shift register pins as output
+{
+  pinMode(latchPin, OUTPUT);
+  pinMode(clockPin, OUTPUT);
+  pinMode(dataPin, OUTPUT);
+
+  // Start with the clockPin set to a LOW state
+  digitalWrite(clockPin, LOW);
+}
+
+// Function to be called in the traffic lights loop each time an LED needs to blink for the last 3 seconds
+void blinkLED(int pin) { // the pin parameter determines which LEDs will blink
+  int startTime;
+  int endTime;
+  int loopcount;
+  startTime = millis();
+  endTime = startTime;
+  while ((endTime - startTime) <= 3000) { // loops for 3 seconds
+    digitalWrite(latchPin, LOW);  // flashing specified LED repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
+    shiftOut(dataPin, clockPin, MSBFIRST, pin); // LED on
+    digitalWrite(latchPin, HIGH);
+    delay(500); // 0.5 second delay while LED is on
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000); // LED off
+    digitalWrite(latchPin, HIGH);
+    delay(500); // 0.5 second delay while LED is off
+    loopcount = loopcount+1;
+    endTime = millis();
+  }
+}
+
+void loop() {
+  // GLA stays on for 5 seconds
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00011000); // the GLA LEDs are synchronized for both traffic lights
+  digitalWrite(latchPin, HIGH);
+  delay(2000);  // GLA stays on full for 2 seconds before flashing for 3 seconds 
+  blinkLED(0b00011000); // calling function to blink red LED
+  
+  // Green stays on for 12 seconds
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b00100100); // the green LEDs are synchronized for both traffic lights
+  digitalWrite(latchPin, HIGH);
+  delay(9000); // green stays on full for 9 seconds before flashing for 3 seconds 
+  blinkLED(0b00100100); // calling function to blink red LED
+
+  // Yellow stays on for 3 seconds
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b01000010); // the yellow LEDs are synchronized for both traffic lights
+  digitalWrite(latchPin, HIGH);
+  delay(3000);  // Yellow stays on for 3 seconds
+
+  // Red stays on for 20 seconds
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0b10000001); // the red LEDs are synchronized for both traffic lights
+  digitalWrite(latchPin, HIGH);
+  delay(17000); // green stays on full for 17 seconds before flashing for 3 seconds 
+  blinkLED(0b10000001); // calling function to blink red LED
+}
+
+// Sources: 
+// Elegoo Super Starter Kit forUNO, Lesson 16 Eight LED with 74HC595
