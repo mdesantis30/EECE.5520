@@ -1,12 +1,12 @@
 // Lab #1: Traffic Light Controller
-//Matthew DeSantis and Ryan Mouhib, EECE.5520
+// Matthew DeSantis and Ryan Mouhib, EECE.5520
 // This lab is to design a controller for 2 traffic lights with 4 lights each: Red, Yellow, Green, Green-Left-Arrow.
 // The R-GLA-G-Y pattern continues until the system is powered off, an active buzzer beeps for 3 seconds before a light is changed.
 
 int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
-int clockPin = 9;      // (9) SH_CP [SCK] on 74HC595
-int dataPin = 12;     // (12) DS [S1] on 74HC595
-int buzzer = 13;     // the pin of the active buzzer
+int clockPin = 9;       // (9) SH_CP [SCK] on 74HC595
+int dataPin = 12;       // (12) DS [S1] on 74HC595
+int buzzer = 13;        // the pin of the active buzzer
 
 void setup()
 {
