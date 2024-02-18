@@ -6,12 +6,15 @@
 int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
 int clockPin = 9;      // (9) SH_CP [SCK] on 74HC595
 int dataPin = 12;     // (12) DS [S1] on 74HC595
+int buzzer = 13;     // the pin of the active buzzer
 
-void setup() // Set the three shift register pins as output
+void setup()
 {
+  // Set the three shift register pins as output
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
+  pinMode(buzzer, OUTPUT); //initialize the buzzer pin as an output
 }
 
 // Function to be called in the traffic lights loop each time an LED needs to blink for the last 3 seconds
@@ -21,6 +24,7 @@ void blinkLED(int pin) { // the pin parameter determines which LEDs will blink
   int loopcount;
   startTime = millis();
   endTime = startTime;
+  digitalWrite(buzzer, HIGH);
   while ((endTime - startTime) <= 3000) { // loops for 3 seconds
     digitalWrite(latchPin, LOW);  // flashing specified LED repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
     shiftOut(dataPin, clockPin, MSBFIRST, pin); // LED on
@@ -33,6 +37,7 @@ void blinkLED(int pin) { // the pin parameter determines which LEDs will blink
     loopcount = loopcount+1;
     endTime = millis();
   }
+  digitalWrite(buzzer, LOW);
 }
 
 void loop() {
@@ -51,10 +56,12 @@ void loop() {
   blinkLED(0b00100100); // calling function to blink red LED
 
   // Yellow stays on for 3 seconds
+  digitalWrite(buzzer, HIGH);
   digitalWrite(latchPin, LOW);
   shiftOut(dataPin, clockPin, MSBFIRST, 0b01000010); // the yellow LEDs are synchronized for both traffic lights
   digitalWrite(latchPin, HIGH);
   delay(3000);  // Yellow stays on for 3 seconds
+  digitalWrite(buzzer, LOW);
 
   // Red stays on for 20 seconds
   digitalWrite(latchPin, LOW);
@@ -64,5 +71,6 @@ void loop() {
   blinkLED(0b10000001); // calling function to blink red LED
 }
 
-// Sources: 
+// Sources:
+// Elegoo Super Starter Kit forUNO, Lesson 6 Active buzzer
 // Elegoo Super Starter Kit forUNO, Lesson 16 Eight LED with 74HC595
