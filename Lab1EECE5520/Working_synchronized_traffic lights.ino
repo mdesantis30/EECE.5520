@@ -27,7 +27,8 @@ void blinkLED(int pin) // the pin parameter determines which LEDs will blink
   startTime = millis();
   endTime = startTime;
   digitalWrite(buzzer, HIGH);
-  while ((endTime - startTime) <= 3000) { // loops for 3 seconds
+  while ((endTime - startTime) <= 3000) // loops for 3 seconds
+  {
     digitalWrite(latchPin, LOW);  // flashing specified LEDs repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
     shiftOut(dataPin, clockPin, MSBFIRST, pin); // pins are specified when calling blinkLED function in traffic lights loop
     digitalWrite(latchPin, HIGH); // LEDs on
