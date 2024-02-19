@@ -18,7 +18,7 @@ void setup()
   pinMode(buzzer, OUTPUT);
 }
 
-// Function to be called in the traffic lights loop each time an LED needs to blink and buzzer beep for the last 3 seconds
+// Function to be called in the traffic lights loop each time an LED needs to blink and buzzer beep for 3 seconds before a light is changed
 void blinkLED(int pin) // the pin parameter determines which LEDs will blink
 {
   int startTime;
