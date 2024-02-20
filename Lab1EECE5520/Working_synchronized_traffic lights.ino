@@ -6,7 +6,7 @@
 int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
 int clockPin = 9;       // (9) SH_CP [SCK] on 74HC595
 int dataPin = 12;       // (12) DS [S1] on 74HC595
-int buzzer = 13;        // the pin of the active buzzer
+int buzzer = 13;        // pin of the active buzzer
 
 void setup()
 {
@@ -18,8 +18,17 @@ void setup()
   pinMode(buzzer, OUTPUT);
 }
 
-// Function to be called in the traffic lights loop each time an LED needs to blink and buzzer beep for 3 seconds before a light is changed
-void blinkLED(int pin) // the pin parameter determines which LEDs will blink
+// Function to be called when turning on LED
+void turnOnLED(int pinLED) // the pin parameter determines which LED will turn on
+{
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, pinLED); // 0b00010001-> other GLA
+  digitalWrite(latchPin, HIGH);
+}
+
+// Function to be called in the traffic lights loop to blink LED and buzzer beep for 3 seconds before light change in the first traffic light (TL1),
+// while the other traffic's light (TL2) red light remains on
+void blinkLED1(int pinBlink1) // the pinBlink1 parameter determines which LED will blink
 {
   int startTime;
   int endTime;
@@ -27,16 +36,40 @@ void blinkLED(int pin) // the pin parameter determines which LEDs will blink
   startTime = millis();
   endTime = startTime;
   digitalWrite(buzzer, HIGH);
-  while ((endTime - startTime) <= 3000) // loops for 3 seconds
-  {
-    digitalWrite(latchPin, LOW);  // flashing specified LEDs repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
-    shiftOut(dataPin, clockPin, MSBFIRST, pin); // pins are specified when calling blinkLED function in traffic lights loop
-    digitalWrite(latchPin, HIGH); // LEDs on
-    delay(500); // 0.5 second delay while LEDs are on
+  while ((endTime - startTime) <= 3000) { // loops for 3 seconds
+    digitalWrite(latchPin, LOW);  // flashing specified LED repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
+    shiftOut(dataPin, clockPin, MSBFIRST, pinBlink1); // LED is specified when calling blinkLED1 function in traffic lights loop
+    digitalWrite(latchPin, HIGH); // LED on
+    delay(500); // 0.5 second delay while LED is on
     digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-    digitalWrite(latchPin, HIGH); // LEDs off
-    delay(500); // 0.5 second delay while LEDs are off
+    shiftOut(dataPin, clockPin, MSBFIRST, 0b10000000); // cross traffic light's (TL2) red light remains on, while the specified LED blinks
+    digitalWrite(latchPin, HIGH); // LED off
+    delay(500); // 0.5 second delay while LED is off
+    loopcount = loopcount+1;
+    endTime = millis();
+  }
+  digitalWrite(buzzer, LOW);
+}
+
+// Function to be called in the traffic lights loop to blink LED and buzzer beep for 3 seconds before light change in the second traffic light (TL2),
+// while the other traffic's light (TL1) red light remains on
+void blinkLED2(int pinBlink2) // the pin parameter determines which LEDs will blink
+{
+  int startTime;
+  int endTime;
+  int loopcount;
+  startTime = millis();
+  endTime = startTime;
+  digitalWrite(buzzer, HIGH);
+  while ((endTime - startTime) <= 3000) { // loops for 3 seconds
+    digitalWrite(latchPin, LOW);  // flashing specified LED repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
+    shiftOut(dataPin, clockPin, MSBFIRST, pinBlink2); // LED is specified when calling blinkLED1 function in traffic lights loop
+    digitalWrite(latchPin, HIGH); // LED on
+    delay(500); // 0.5 second delay while LED is on
+    digitalWrite(latchPin, LOW);
+    shiftOut(dataPin, clockPin, MSBFIRST, 0b00000001); // cross traffic light's (TL1) red light remains on, while the specified LED blinks
+    digitalWrite(latchPin, HIGH); // LED off
+    delay(500); // 0.5 second delay while LED is off
     loopcount = loopcount+1;
     endTime = millis();
   }
@@ -46,34 +79,35 @@ void blinkLED(int pin) // the pin parameter determines which LEDs will blink
 // Traffic lights loop
 void loop()
 {
-  // GLA stays on for 5 seconds
-  digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b00011000); // the GLA LEDs are synchronized for both traffic lights
-  digitalWrite(latchPin, HIGH); // turning GLA LEDs on
-  delay(2000);  // GLA stays on full for 2 seconds before flashing for 3 seconds 
-  blinkLED(0b00011000); // calling function to blink GLA LEDs and buzzer beep for 3 seconds
-  
-  // Green stays on for 12 seconds
-  digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b00100100); // the green LEDs are synchronized for both traffic lights
-  digitalWrite(latchPin, HIGH); // turning green LEDs on
-  delay(9000); // green stays on full for 9 seconds before flashing for 3 seconds 
-  blinkLED(0b00100100); // calling function to blink green LEDs and buzzer beep for 3 seconds
-
-  // Yellow stays on for 3 seconds
+  // First traffic light (TL1) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
+  // TL1's GLA is on
+  turnOnLED(0b10001000);
+  delay(2000);
+  blinkLED1(0b10001000);
+  // TL1's green is on
+  turnOnLED(0b10000100);
+  delay(9000);
+  blinkLED1(0b10000100); // calling function to blink green LEDs and buzzer beep for 3 seconds
+  // TL1's yellow is on
   digitalWrite(buzzer, HIGH);
-  digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b01000010); // the yellow LEDs are synchronized for both traffic lights
-  digitalWrite(latchPin, HIGH); // turning yellow LEDs on
-  delay(3000);  // Yellow stays on for 3 seconds
+  turnOnLED(0b10000010);
+  delay(3000);
   digitalWrite(buzzer, LOW);
 
-  // Red stays on for 20 seconds
-  digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, 0b10000001); // the red LEDs are synchronized for both traffic lights
-  digitalWrite(latchPin, HIGH); // turning red LEDs on
-  delay(17000); // green stays on full for 17 seconds before flashing for 3 seconds 
-  blinkLED(0b10000001); // calling function to blink red LEDs and buzzer beep for 3 seconds
+  // Second traffic light (TL2) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
+  // TL2's GLA is on
+  turnOnLED(0b00010001);
+  delay(2000);
+  blinkLED2(0b00010001);
+  // TL2's green is on
+  turnOnLED(0b00100001);
+  delay(9000);
+  blinkLED2(0b00100001); // calling function to blink green LEDs and buzzer beep for 3 seconds
+  // TL2's yellow is on
+  digitalWrite(buzzer, HIGH);
+  turnOnLED(0b01000001);
+  delay(3000);
+  digitalWrite(buzzer, LOW);
 }
 
 // Sources:
