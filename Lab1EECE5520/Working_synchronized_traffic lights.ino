@@ -22,7 +22,7 @@ void setup()
 void turnOnLED(int pinLED) // the pin parameter determines which LED will turn on
 {
   digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, pinLED); // 0b00010001-> other GLA
+  shiftOut(dataPin, clockPin, MSBFIRST, pinLED);
   digitalWrite(latchPin, HIGH);
 }
 
