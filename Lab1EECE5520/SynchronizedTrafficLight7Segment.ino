@@ -22,7 +22,7 @@ void setup()
 void turnOnLED(int pinLED) // the pin parameter determines which LED will turn on
 {
   digitalWrite(latchPin, LOW);
-  shiftOut(dataPin, clockPin, MSBFIRST, pinLED); // 0b00010001-> other GLA
+  shiftOut(dataPin, clockPin, MSBFIRST, pinLED);
   digitalWrite(latchPin, HIGH);
 }
 
@@ -81,32 +81,32 @@ void loop()
 {
   // First traffic light (TL1) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
   // TL1's GLA is on
-  turnOnLED(0b10001000);
-  delay(2000);
+  turnOnLED(0b10001000); // calling turnOnLED to turn on TL1's GLA while keeping TL2's red light on
+  delay(2000); // TL1's GLA stays on full for 2 seconds before blinking for 3 seconds
   blinkLED1(0b10001000);
   // TL1's green is on
-  turnOnLED(0b10000100);
-  delay(9000);
-  blinkLED1(0b10000100); // calling function to blink green LEDs and buzzer beep for 3 seconds
+  turnOnLED(0b10000100); // calling turnOnLED to turn on TL1's green light while keeping TL2's red light on 
+  delay(9000); TL1's green stays on full for 9 seconds before blinking for 3 seconds
+  blinkLED1(0b10000100); // calling blinkLED1 to blink TL1's green while keeping TL2's red light on and buzzer beep for 3 seconds
   // TL1's yellow is on
   digitalWrite(buzzer, HIGH);
-  turnOnLED(0b10000010);
-  delay(3000);
+  turnOnLED(0b10000010); // calling turnOnLED to turn on TL1's yellow light while keeping TL2's red light on 
+  delay(3000); TL1's yellow stays on full and buzzer beeps for 3 seconds
   digitalWrite(buzzer, LOW);
 
   // Second traffic light (TL2) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
   // TL2's GLA is on
-  turnOnLED(0b00010001);
-  delay(2000);
-  blinkLED2(0b00010001);
+  turnOnLED(0b00010001); // calling turnOnLED to turn on TL2's GLA while keeping TL1's red light on
+  delay(2000); // TL2's GLA stays on full for 2 seconds before blinking for 3 seconds
+  blinkLED2(0b00010001); // calling blinkLED1 to blink TL2's GLA while keeping TL1's red light on and buzzer beep for 3 seconds
   // TL2's green is on
-  turnOnLED(0b00100001);
-  delay(9000);
-  blinkLED2(0b00100001); // calling function to blink green LEDs and buzzer beep for 3 seconds
+  turnOnLED(0b00100001); // calling turnOnLED to turn on TL2's green light while keeping TL1's red light on
+  delay(9000); TL2's green stays on full for 9 seconds before blinking for 3 seconds
+  blinkLED2(0b00100001); // calling blinkLED1 to blink TL2's green while keeping TL1's red light on and buzzer beep for 3 seconds
   // TL2's yellow is on
   digitalWrite(buzzer, HIGH);
-  turnOnLED(0b01000001);
-  delay(3000);
+  turnOnLED(0b01000001); // calling turnOnLED to turn on TL2's yellow light while keeping TL1's red light on 
+  delay(3000); TL2's yellow stays on full and buzzer beeps for 3 seconds
   digitalWrite(buzzer, LOW);
 }
 
