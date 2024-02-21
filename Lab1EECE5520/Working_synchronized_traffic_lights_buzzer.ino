@@ -19,7 +19,6 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
-
   //initialize the buzzer pin as an output
   pinMode(buzzer, OUTPUT);
   // initialize the pushbutton pin as an input:
@@ -140,77 +139,6 @@ void loop()
     } while (buttonState == HIGH); // to keep repeating the pattern after the button has been pressed
   }
 }
-
-void disp(byte number, bool decimalPoint)
-{
-// the following switch cases correspond to all the different combinations of digits that can be formed
-// each digit is synonymous to a hexadecimal value
-// shiftOut will send serial data of the hexadecimal value to the data and clock pins 
-  switch (number)
-  {
-    case 0:  // print 0
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x02 | !decimalPoint);
-      // shift the most significant bit by corresponding hexadecimal value
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 1:  // print 1
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x9E | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 2:  // print 2
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x24 | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 3:  // print 3
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x0C | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 4:  // print 4
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x98 | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 5:  // print 5
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x48 | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 6:  // print 6
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x40 | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
-    
-    case 7:  // print 7
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x1E | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 8:  // print 8
-      shiftOut(dataPin, clockPin, MSBFIRST, !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-      break;
- 
-    case 9:  // print 9
-      shiftOut(dataPin, clockPin, MSBFIRST, 0x08 | !decimalPoint);
-      digitalWrite(clockPin, HIGH);
-      digitalWrite(clockPin, LOW);
-  }
-}
- 
-
 
 // Sources:
 // Elegoo Super Starter Kit forUNO, Lesson 6 Active buzzer
