@@ -89,20 +89,21 @@ void blinkLED2(int pinBlink2) // the pin parameter determines which LEDs will bl
 void loop()
 {
   // Both red lights are initially flashing until the button is pressed to initiate the R-GLA-G-Y pattern   
-  buttonState = digitalRead(buttonPin); // read the state of the pushbutton value:
+  buttonState = digitalRead(buttonPin); // read the state of the pushbutton value
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (buttonState == LOW) 
+  if (buttonState == LOW) // button default state at the start of the system (power up)
   {
+    // both red lights flash (0.5 second on then 0.5 second off) until a button is pressed
     digitalWrite(latchPin, LOW);
-    shiftOut(dataPin, clockPin, MSBFIRST, 0b10000001); 
-    digitalWrite(latchPin, HIGH);
-    delay(500);
+    shiftOut(dataPin, clockPin, MSBFIRST, 0b10000001);
+    digitalWrite(latchPin, HIGH); // LED on
+    delay(500); // 0.5 second delay while LED is on
     digitalWrite(latchPin, LOW);
     shiftOut(dataPin, clockPin, MSBFIRST, 0b00000000);
-    digitalWrite(latchPin, HIGH);
-    delay(500);
+    digitalWrite(latchPin, HIGH); // LED off
+    delay(500); // 0.5 second delay while LED is off
   } 
-  else if (buttonState == HIGH) 
+  else if (buttonState == HIGH) // button has been pressed
   {
     do 
     {
@@ -135,7 +136,7 @@ void loop()
       turnOnLED(0b01000001); // calling turnOnLED to turn on TL2's yellow light while keeping TL1's red light on 
       delay(3000); // TL2's yellow stays on full and buzzer beeps for 3 seconds
       digitalWrite(buzzer, LOW);
-    } while (buttonState == HIGH);
+    } while (buttonState == HIGH); // to keep repeating the pattern after the button has been pressed
   }
 }
 
