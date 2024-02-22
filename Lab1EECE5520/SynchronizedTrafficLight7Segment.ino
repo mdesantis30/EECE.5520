@@ -10,29 +10,29 @@
 
 // constants won't change. They're used here to set pin numbers:
 const int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
-const int clockPin = 9;       // (9) SH_CP [SCK] on 74HC595
+const int clockPin = 13;       // (9) SH_CP [SCK] on 74HC595
 const int dataPin = 12;       // (12) DS [S1] on 74HC595
-const int buzzer = 13;        // pin of the active buzzer
-const int buttonPin = 10;  // the number of the pushbutton pin to begin the traffic light system
+const int buzzer = 10;        // pin of the active buzzer
+const int buttonPin = 52;  // the number of the pushbutton pin
 // countdown timer modification buttons (start, reset, add, subtract)
-const int cdButton1 = 15;
-const int cdButton2 = 16;
-const int cdButton3 = 17;
-const int cdButton4 = 18;
+const int cdButton1 = 47;
+const int cdButton2 = 49;
+const int cdButton3 = 51;
+const int cdButton4 = 53;
 
 // 7 segment pin declarations - corresponds to the pins of the 7 segment device 
-const int pinA = 2;
-const int pinB = 3;
-const int pinC = 4;
-const int pinD = 5;
-const int pinE = 6;
-const int pinF = 7;
-const int pinG = 8;
+const int pinA = 31;
+const int pinB = 33;
+const int pinC = 35;
+const int pinD = 37;
+const int pinE = A0;
+const int pinF = 39;
+const int pinG = 41;
 // pin numbers of each digit
-const int digit1 = 20;
-const int digit2 = 21;
-const int digit3 = 22;
-const int digit4 = 23;
+const int digit1 = 5;
+const int digit2 = 49;
+const int digit3 = 53;
+const int digit4 = 51;
 // array with each digit pin assigned to respective digit
 int digitPins[] = {digit1, digit2, digit3, digit4};
 int countdown = 60; // seconds
@@ -51,12 +51,10 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
-
   // initialize the buzzer pin as an output
   pinMode(buzzer, OUTPUT);
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
-
   // initialize the 7-segment display LEDs for each indidual digit
   pinMode(pinA, OUTPUT); 
   pinMode(pinB, OUTPUT);
@@ -90,6 +88,20 @@ void setup()
     pinMode(digitPins[i], OUTPUT);
   }
 
+  pinMode(cdButton1,INPUT_PULLUP);
+  pinMode(cdButton2,INPUT_PULLUP);
+  pinMode(cdButton3,INPUT_PULLUP);
+  pinMode(cdButton4,INPUT_PULLUP);
+
+}
+
+void  playTone(int tone, int duration) {
+  for (long k = 0; k < duration * 1000L; k  += tone * 2) {  
+    digitalWrite(buzzer, HIGH);
+    delayMicroseconds(tone);
+    digitalWrite(buzzer, LOW);
+    delayMicroseconds(tone);
+  }
 }
 
 // Function to be called when turning on LED
