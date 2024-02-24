@@ -98,15 +98,6 @@ void setup()
 
 }
 
-void  playTone(int tone, int duration) {
-  for (long k = 0; k < duration * 1000L; k  += tone * 2) {  
-    digitalWrite(buzzer, HIGH);
-    delayMicroseconds(tone);
-    digitalWrite(buzzer, LOW);
-    delayMicroseconds(tone);
-  }
-}
-
 // Function to be called when turning on LED
 void turnOnLED(int pinLED) // the pin parameter determines which LED will turn on
 {
@@ -124,7 +115,7 @@ void blinkLED1(int pinBlink1) // the pinBlink1 parameter determines which LED wi
   int loopcount;
   startTime = millis();
   endTime = startTime;
-  digitalWrite(buzzer, HIGH);
+  //digitalWrite(buzzer, HIGH);
   while((endTime - startTime) <= 3000)
   { // loops for 3 seconds
     digitalWrite(latchPin, LOW);  // flashing specified LED repeatedly by first turning it on for 0.5 seconds then off for 0.5 seconds
@@ -380,42 +371,30 @@ void reset() {
   int m = countdown;
   int zeros;
   int d;
-  // int isPressed3  = 0; 
-  // int isPressed4 = 0;
   struct digitStruct dig;
-  //struct digitStruct dig2;
-  //struct digitStruct dig3;
-  //struct digitStruct dig4;
   dig = intDigConversion(countdown);
-  //dig2 = intDigConversion(countdownGLA);
-  //dig3 = intDigConversion(countdownYellow);
-  //dig4 = intDigConversion(countdownRed);
   
   // while the first button is pressed (AKA the countdown timer started) set the countdown timer
   while(digitalRead(cdButton1) == LOW)  {   // changing this to LOW from HIGH will automatically start the countdown timer
     for(int j = 0; j < 4; j++) {
       switchDigit(j);
       dispNum(dig.digitNum[j]);
-      //dispNum(dig2.digitNum[j]);
-      //dispNum(dig3.digitNum[j]);
-      //dispNum(dig4.digitNum[j]);
       delay(5);
       // the first loop reads the countdown timer value onto the display
     }
   }
 }
 
+void trafficBuzzer() {
+  tone(buzzer, 1000); // 1000Hz signal
+  delay(100);        // 1/10 second
+  noTone(buzzer);     // Stop sound
+  delay(100);        // for 1/10 second
+}
+
 // TRAFFIC LIGHT LOOP
 void loop()
-{
-  // 7 segment display loop
-  // removing this continues the countdown timer without the need for any buttons
-  /* reset(); // keep resetting the countdown timer 
-  while(!countdownFunct(countdown, 1000) && !countdownFunct(countdownGLA, 1000) && !countdownFunct(countdownYellow, 1000) && !countdownFunct(countdownRed, 1000))  {
-    reset();
-  }
-  while (digitalRead(cdButton2) == 1){}; */
-  
+{  
   // Both red lights are initially flashing until the button is pressed to initiate the R-GLA-G-Y pattern   
   buttonState = digitalRead(buttonPin); // read the state of the pushbutton value
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
@@ -431,10 +410,10 @@ void loop()
     digitalWrite(latchPin, HIGH); // LED off
     delay(500); // 0.5 second delay while LED is off
   } 
-  else if (buttonState == HIGH) // button has been pressed
+  if (buttonState == HIGH) // button has been pressed
   {
-    do 
-    {
+    //do 
+    //{
       /*7h595 IC notes
         * right red LED is QF => 00000100
         * right yellow LED is QA => 10000000
@@ -445,59 +424,58 @@ void loop()
         * left bottom green LED is QD => 00010000
         * left top green LED is QE => 00001000 (GLA)
       */
-
+      
       // start traffic cycle with constant red lights
-      reset();
       turnOnLED(0b00100010); // keep lights red for the allowed time
       countdownFunct(countdownRed, 1000);
-      //delay(2000);
-      
+      delay(2000);
+      //reset();
       // First traffic light (TL1) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
       // TL1's GLA is on
-      // note: start the countdowns AFTER the LEDs turn on
-      // reset();
+      // start the countdowns AFTER the LEDs turn on
+      trafficBuzzer();
       turnOnLED(0b10000010); // calling turnOnLED to turn on TL1's GLA while keeping TL2's red light on
       countdownFunct(countdownGLA, 1000);
       delay(2000); // TL1's GLA stays on full for 2 seconds before blinking for 3 seconds
       countdownFunct(countdownYellow, 1000);
       blinkLED1(0b10000001);
+      trafficBuzzer();
+      
       // TL1's green is on
-      //reset();
       turnOnLED(0b01000010); // calling turnOnLED to turn on TL1's green light while keeping TL2's red light on 
-      //delay(100);
       countdownFunct(countdown, 1000);
       delay(9000); // TL1's green stays on full for 9 seconds before blinking for 3 seconds
       blinkLED1(0b10000100); // calling blinkLED1 to blink TL1's green while keeping TL2's red light on and buzzer beep for 3 seconds
+      trafficBuzzer();
+      
       // TL1's yellow is on
-      //reset();
-      digitalWrite(buzzer, HIGH);
       turnOnLED(0b11000000); // calling turnOnLED to turn on TL1's yellow light while keeping TL2's red light on 
       countdownFunct(countdownYellow, 1000);
       delay(3000); // TL1's yellow stays on full and buzzer beeps for 3 seconds
-      digitalWrite(buzzer, LOW);
+      trafficBuzzer();
       
       // Second traffic light (TL2) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
       // TL2's GLA is on
-      //reset();  // call the reset to the countdown timer without needing to press any buttons
       turnOnLED(0b00001100); // calling turnOnLED to turn on TL2's GLA while keeping TL1's red light on
       countdownFunct(countdownGLA, 1000);
       delay(2000); // TL2's GLA stays on full for 2 seconds before blinking for 3 seconds
       blinkLED2(0b00001000); // calling blinkLED1 to blink TL2's GLA while keeping TL1's red light on and buzzer beep for 3 seconds
+      trafficBuzzer();
+
       // TL2's green is on
-      //reset();
       turnOnLED(0b00010100); // calling turnOnLED to turn on TL2's green light while keeping TL1's red light on
       countdownFunct(countdown, 1000); 
       delay(9000); // TL2's green stays on full for 9 seconds before blinking for 3 seconds
       blinkLED2(0b00010000); // calling blinkLED1 to blink TL2's green while keeping TL1's red light on and buzzer beep for 3 seconds
+      trafficBuzzer();
+
       // TL2's yellow is on
-      //reset();
-      digitalWrite(buzzer, HIGH);
       turnOnLED(0b00100100); // calling turnOnLED to turn on TL2's yellow light while keeping TL1's red light on 
       countdownFunct(countdownYellow, 1000);
       delay(3000); // TL2's yellow stays on full and buzzer beeps for 3 seconds
-      digitalWrite(buzzer, LOW);
+      trafficBuzzer();
 
-    } while (buttonState == HIGH); // to keep repeating the pattern after the button has been pressed
+    //} while (buttonState == HIGH); // to keep repeating the pattern after the button has been pressed
   }
 }
 // Sources:
