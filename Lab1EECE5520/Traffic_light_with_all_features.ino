@@ -9,8 +9,9 @@
 // Set up our 7 segment display according to SevSeg library
 SevSeg sevseg; 
 
-// How long to delay
+// How long to delay for the countdown timer
 #define delayTime 1000
+
 // constants won't change. They're used here to set pin numbers:
 const int latchPin = 11;      // (11) ST_CP [RCK] on 74HC595
 const int clockPin = 9;       // (9) SH_CP [SCK] on 74HC595
@@ -39,12 +40,26 @@ void setup()
   
   // These refer to the segments/LEDs of each digit
   byte segmentPins[] = {43,47,51,49,48,44,52};
+
+  // Mapping segments characters to corresponding digit
+  byte digitMap[] = {
+  B11111100, // digit 0
+  B01100000, // digit 1
+  B11011010, // digit 2
+  B11110010, // digit 3
+  B01100110, // digit 4
+  B10110110, // digit 5
+  B10111110, // digit 6
+  B11100000, // digit 7
+  B11111110, // digit 8
+  B11110110  // digit 9
+  };
   
   // The 5641AS 7 segment 4 digit display is a common cathode display
   byte hardwareConfig = COMMON_CATHODE;
   
-  // Start the display
-  sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins);
+  // Initializing sevseg to start the display with custom segment map
+  sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, digitMap);
   
   // Set brightness between 0 and 100
   sevseg.setBrightness(30);
@@ -55,10 +70,11 @@ void setup()
 
 // Function to control LEDs
 void controlLED(int mainLEDpin, int pinBlinkLED, int counterTime, int totalTime){
-  // mainLEDpin
-  // pinBlinkLED
-  // counterTime
-  // totalTime
+  // mainLEDpin will allow the function to control the specified LED
+  // pinBlinkLED is set as a reference register to either blink the specified LED, keep it turned on or blink/turn on a different LED,
+  // e.g., when TL1's traffic light is yellow for 3 seconds, TL2, traffic light needs to be flashing
+  // counterTime determine the countdown to be displayed on the 7 segment display
+  // totalTime determines for how long the LED will either blink or be full on
   unsigned long startTime = millis(); // Record the start time
   while (millis() - startTime < totalTime) { // totalTime determines how long the led will either be on or blink
     timerCountdown(&counterTime);
@@ -68,7 +84,7 @@ void controlLED(int mainLEDpin, int pinBlinkLED, int counterTime, int totalTime)
       digitalWrite(latchPin, HIGH);
     } else {
       digitalWrite(latchPin, LOW);
-      shiftOut(dataPin, clockPin, MSBFIRST, pinBlinkLED); // Turn off the LED -->0b00000000
+      shiftOut(dataPin, clockPin, MSBFIRST, pinBlinkLED); // Turn off the LED
       digitalWrite(latchPin, HIGH);
     }
   }
@@ -77,12 +93,12 @@ void controlLED(int mainLEDpin, int pinBlinkLED, int counterTime, int totalTime)
 // Display the timer countdown on the 7 segment display
 void timerCountdown(int *counter) 
 { 
-  static unsigned long timer = millis(); // Static variable to store the last time the function was called
-  if (millis() - timer >= delayTime) // Check if the specified delay time has elapsed
+  static unsigned long timer = millis(); // static variable to store the last time the function was called
+  if (millis() - timer >= delayTime) // check if the specified delay time has elapsed
   {
-    if (*counter % 2 == 0) // If counter is even
+    if (*counter % 2 == 0)
     {
-      sevseg.setNumber(*counter, 0);
+      sevseg.setNumber(*counter, 0); 
     } 
     else 
     {
@@ -90,14 +106,14 @@ void timerCountdown(int *counter)
     }
     if(*counter > 0 )
     {
-      (*counter)--; // Decrement the value pointed to by counter
+      (*counter)--; // decrement the value pointed to by counter
     }
     else
     {
-      counter = 0; // displays 0
-      return; // Reset back to start
+      counter = 0; // reset counter to 0
+      return; // reset back to start
     }
-    timer = millis(); // Update the timer to the current time
+    timer = millis();
   }
   sevseg.refreshDisplay();
 } 
@@ -115,11 +131,12 @@ void loop()
   } 
   else if (buttonState == HIGH) // button has been pressed
   {
+    sevseg.refreshDisplay();
     do // loop to repeat the R-GLA-G-Y pattern for the traffic lights after the button has been pressed
     {
       // First traffic light (TL1) GLA->yellow->green pattern begins while the other traffic light's red light sequence begins
       // TL1's GLA is on while keeping TL2's red light on for a total of 5 seconds
-      controlLED(0b10001000, 0b10001000, 5, 2000); // // calling controlLED to turn on the GLA LED for 2 seconds and then blinking for 3 seconds
+      controlLED(0b10001000, 0b10001000, 5, 2000); // calling controlLED to turn on the GLA LED for 2 seconds and then blinking for 3 seconds
       digitalWrite(buzzer, HIGH);
       controlLED(0b10001000, 0b10000000, 3, 3000); // flashing TL1's GLA while keeping TL2's red on
       digitalWrite(buzzer, LOW);
