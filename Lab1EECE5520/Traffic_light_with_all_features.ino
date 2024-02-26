@@ -80,11 +80,11 @@ void controlLED(int mainLEDpin, int pinBlinkLED, int counterTime, int totalTime)
     timerCountdown(&counterTime);
     if ((millis() - startTime) % 1000 < 500) {
       digitalWrite(latchPin, LOW);
-      shiftOut(dataPin, clockPin, MSBFIRST, mainLEDpin); // Turn on the LED
+      shiftOut(dataPin, clockPin, MSBFIRST, mainLEDpin); // Turn on the LED, used to send data to a shift register connected to the LED pins
       digitalWrite(latchPin, HIGH);
     } else {
       digitalWrite(latchPin, LOW);
-      shiftOut(dataPin, clockPin, MSBFIRST, pinBlinkLED); // Turn off the LED
+      shiftOut(dataPin, clockPin, MSBFIRST, pinBlinkLED); // Turn off the LED, used to send data to a shift register connected to the LED pins
       digitalWrite(latchPin, HIGH);
     }
   }
@@ -98,11 +98,11 @@ void timerCountdown(int *counter)
   {
     if (*counter % 2 == 0)
     { //The first argument is the number to display. The second argument indicates where the decimal place should be, counted from the least significant digit
-      sevseg.setNumber(*counter, 0); 
+      sevseg.setNumber(*counter, 0); // display the number on the 7-segment display.
     } 
     else 
     {
-        sevseg.setNumber(*counter, -1);
+        sevseg.setNumber(*counter, -1); // after setting the number to display, it decrements the digit value
     }
     if(*counter > 0 )
     {
@@ -113,9 +113,9 @@ void timerCountdown(int *counter)
       counter = 0; // reset counter to 0
       return; // reset back to start
     }
-    timer = millis();
+    timer = millis(); // Update the timer to the current time
   }
-  sevseg.refreshDisplay();
+  sevseg.refreshDisplay(); // refresh the display each iteration
 } 
 
 // Traffic lights main loop
