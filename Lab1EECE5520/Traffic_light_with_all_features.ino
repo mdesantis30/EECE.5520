@@ -94,10 +94,10 @@ void controlLED(int mainLEDpin, int pinBlinkLED, int counterTime, int totalTime)
 void timerCountdown(int *counter) 
 { 
   static unsigned long timer = millis(); // static variable to store the last time the function was called
-  if (millis() - timer >= delayTime) // check if the specified delay time has elapsed
+  if (millis() - timer >= delayTime) // the countdown display changes every one second
   {
     if (*counter % 2 == 0)
-    {
+    { //The first argument is the number to display. The second argument indicates where the decimal place should be, counted from the least significant digit
       sevseg.setNumber(*counter, 0); 
     } 
     else 
