@@ -167,7 +167,8 @@ while True:
         #     print(line)
         #     flag = ser.write(b'E')
         #     if flag:
-        #         activate buzzer # how to do this?
+                # how to activate buzzer ?   
+                # read serial data from Arduino file for buzzer and IMU                
 
         # Move the food to a random spot
         x = random.randint(-290, 290)
@@ -236,6 +237,6 @@ while True:
 
     # check here for accelerometer shaking to change score from 10 to 20
 
-    
+
 
 wn.mainloop()
