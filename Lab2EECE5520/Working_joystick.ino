@@ -34,6 +34,7 @@ void setup() {
 }
 
 void loop() {
+  // reading data from analog pins
   X_read = analogRead(X_pin);
   Y_read = analogRead(Y_pin);
   
