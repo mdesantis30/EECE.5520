@@ -169,6 +169,9 @@ while True:
             print(line)
             ser.write(b'E')
 
+        if line == 'E':
+            # beep buzzer
+
         # Move the food to a random spot
         x = random.randint(-290, 290)
         y = random.randint(-290, 290)
