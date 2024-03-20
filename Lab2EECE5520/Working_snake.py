@@ -20,7 +20,11 @@ delay = 0.1
 # Score
 score = 0
 high_score = 0
-ppa = 10
+
+if(ser.read(b'Shake detected')):
+    ppa = 20
+else:
+    ppa = 10
 
 # Set up the screen
 wn = turtle.Screen()
