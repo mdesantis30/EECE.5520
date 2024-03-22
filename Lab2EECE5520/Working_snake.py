@@ -20,11 +20,7 @@ delay = 0.1
 # Score
 score = 0
 high_score = 0
-
-if(ser.read(b'Shake detected')):
-    ppa = 20
-else:
-    ppa = 10
+ppa = 10
 
 # Set up the screen
 wn = turtle.Screen()
@@ -117,10 +113,8 @@ while True:
     ##     head.direction = "down"
     ## elif ......
     ##
-
     # Read control information from serial port
     control_information = ser.readline().decode().strip()
-    
     # Set head.direction based on control_information
     if control_information == 'Moves down':
         head.direction = "down"
@@ -130,7 +124,13 @@ while True:
         head.direction = "right"
     elif control_information == 'Moves left':
         head.direction = "left"
-    
+    elif control_information == 'Shake detected':
+            food.color("gold")
+            ppa = 20
+            # Update the score display
+            pen.clear()
+            pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal")) 
+        
 
     # Check for a collision with the border
     if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
@@ -157,6 +157,16 @@ while True:
 
     # Check for a collision with the food
     if head.distance(food) < 20:
+        if food.color()[0] == 'gold':
+            ppa = 20
+            # Change the color back to red
+            food.color("red")
+        else:
+            ppa = 10
+            
+        # Update the score display
+        pen.clear()
+        pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal"))
         
         ## TODO: notes by Prof. Luo
         ## you need to send a flag to Arduino indicating an apple is eaten
@@ -182,11 +192,13 @@ while True:
         delay -= 0.001
 
         # Increase the score
-        score += 10
+        score += ppa
 
         if score > high_score:
             high_score = score
-        
+
+        # Reset ppa to 10 after apple is eaten
+        ppa = 10
         pen.clear()
         pen.write("Score: {}  High Score: {}  P/A: {}".format(score, high_score, ppa), align="center", font=("Courier", 24, "normal")) 
 
