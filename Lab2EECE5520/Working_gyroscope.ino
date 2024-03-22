@@ -76,7 +76,7 @@ void loop(){
     Serial.print("\n\n");
   }
   
-  delay(300); // update every 0.1 seconds
+  delay(100); // update every 0.1 seconds
 
   // Check if Python sent a signal indicating an apple is eaten
   if (Serial.available() > 0) {
