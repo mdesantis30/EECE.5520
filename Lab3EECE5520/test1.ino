@@ -1,3 +1,12 @@
+/*
+***Lab 3 EECE5520 Sensors and Actuators
+***Matthew DeSantis and Ryan Mouhib
+***Professor Yan Luo
+***The following code is designed to move a small robot
+***around an obstacle via ultrasonic sensors and DC motors
+***while using sounds (frequencies) to stop and move the robot.
+*/
+
 #include <Wire.h>
 // Install new library
 #include "arduinoFFT.h"
@@ -56,6 +65,8 @@ void turnLeft();
 void turnRight();
 void avoidObstacle();
 void detectPeakFrequency();
+void stopRobot();
+void moveRobot();
 void comparePeakFrequency();
 bool isInRange(double frequency, double targetFrequency);
 
@@ -92,7 +103,8 @@ void loop() {
   // If obstacle is detected, avoid it; otherwise, move forward
   if (distance < 20) {
     avoidObstacle();
-  } else {
+  } 
+  else {
     // Move forward at a specified speed
     moveForward(255); // Full speed
   }
@@ -182,6 +194,7 @@ void detectPeakFrequency() {
     vReal[i] = analogRead(micPin);
     vImag[i] = 0;
     while (micros() < (microseconds + sampling_period_us)) {
+
     }
   }
 
@@ -200,16 +213,36 @@ void detectPeakFrequency() {
 
 // Function to compare peak frequency with predefined frequencies
 void comparePeakFrequency() {
-  // Check if the peak frequency corresponds to C4 or A4 note
+  /// Check if the peak frequency corresponds to C4 or A4 note
   if (isInRange(peakFrequency, C4_FREQUENCY)) {
     Serial.println("Detected note: C4");
-  } else if (isInRange(peakFrequency, A4_FREQUENCY)) {
+    // Stop the robot if the detected note is C4
+    stopRobot();
+  } 
+  else if (isInRange(peakFrequency, A4_FREQUENCY)) {
     Serial.println("Detected note: A4");
-  } else {
+    // Move the robot if the detected note is A4
+    moveRobot();
+  } 
+  else {
     Serial.println("Unknown note");
   }
   // Delay for readability
   delay(1000);
+}
+
+// Function to stop the robot
+void stopRobot() {
+  digitalWrite(motor1Pin1, LOW);
+  digitalWrite(motor1Pin2, LOW);
+  digitalWrite(motor2Pin1, LOW);
+  digitalWrite(motor2Pin2, LOW);
+}
+
+// Function to move the robot
+void moveRobot() {
+  // Move forward at full speed
+  moveForward(255);
 }
 
 // Function to check if a frequency is within a certain range
