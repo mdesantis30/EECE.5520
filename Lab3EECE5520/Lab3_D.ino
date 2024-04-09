@@ -31,6 +31,8 @@ void setup()
   pinMode(in3Pin, OUTPUT);
   pinMode(in4Pin, OUTPUT);
   pinMode(enBPin, OUTPUT);
+
+  Serial.begin(9600); // starts the serial communication
 }
 
 // Function to set motor direction and speed
@@ -50,12 +52,12 @@ void setMotorSpeed(int speedA, int speedB, bool dirA, bool dirB) {
 }
 
 // Function to read distance from the ultrasonic sensor , return distance in millimeters
-unsigned int readDistance ()
+unsigned int readDistance()
 {
-  digitalWrite ( trigPin , HIGH );
-  delayMicroseconds (10);
-  digitalWrite ( trigPin , LOW );
-  unsigned long period = pulseIn ( echoPin, HIGH ); // pulseIn returns time in microseconds (10ˆ−6)
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  unsigned long period = pulseIn (echoPin, HIGH); // pulseIn returns time in microseconds (10ˆ−6)
   // 2d = p * 10ˆ−6 s * 343 m/s = p * 0.00343 m = p * 0.343 mm/us
   return period * 343 / 2000; // Speed of sound in dry air , 20C is 343 m/s
 }
@@ -63,28 +65,39 @@ unsigned int readDistance ()
 void loop()
 {
   unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
-  unsigned int desiredDistance = 200; // define desired distance from the object (trash can) to 200 mm
-  unsigned int tolerance = 10; // define the tolerance for distance adjustment to 10 mm
+  unsigned int desiredDistance = 100; // define desired distance from the object (trash can) to 200 mm
   
-  // If the measured distance is less than the desired distance minus the tolerance, turn slightly left
-  if (distance < desiredDistance - tolerance)
+  setMotorSpeed(100, 100, true, true);
+  delay(10);
+
+  if (distance < 100) // If the measured distance is less than the desired distance turn slightly left
   {
-    // Turn slightly left
+    // Turn slightly left to check distance and shape of object being circled
     setMotorSpeed(200, 200, true, false);
     delay(100);
+    Serial.print("Car turning left.\n");
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print("\n");
   }
-  // If the measured distance is greater than the desired distance plus the tolerance, turn slightly right
-  else if (distance > desiredDistance + tolerance)
+  else if (distance > 150) // If the measured distance is greater than the desired distance turn slightly right
   {
     // Turn slightly right
     setMotorSpeed(200, 200, false, true);
     delay(100);
+    Serial.print("Car turning right.\n");
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print("\n");
   }
-  // If the measured distance is within the acceptable range, move forward
-  else
+  else // If the measured distance is within the acceptable range, move forward
   {
     // Move forward
     setMotorSpeed(200, 200, true, true);
     delay(100);
+    Serial.print("Car moving forward.\n");
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print("\n");
   }
 }
