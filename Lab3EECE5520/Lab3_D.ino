@@ -1,5 +1,6 @@
 // Lab #3: Sensors and Actuators -  Designing a robot car that can drive itself surrounding an object such as a trash can or
-// a one-gallon milk bottle using a robot kit
+// a one-gallon milk bottle using a robot kit using a distance measurement function to determine the car’s distance from 
+// the nearby object a and then control the movement of the car accordingly.
 // Matthew DeSantis and Ryan Mouhib, EECE.5520
 
 #include <arduinoFFT.h>
@@ -61,47 +62,29 @@ unsigned int readDistance ()
   
 void loop()
 {
-  // Read distance from the ultrasonic sensor
-  unsigned int distance = readDistance();
-  
-  // Define the desired distance from the object (trash can)
-  unsigned int desiredDistance = 200; // 200mm
-  
-  // Define the tolerance for distance adjustment
-  unsigned int tolerance = 10; // 10mm
+  unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
+  unsigned int desiredDistance = 200; // define desired distance from the object (trash can) to 200 mm
+  unsigned int tolerance = 10; // define the tolerance for distance adjustment to 10 mm
   
   // If the measured distance is less than the desired distance minus the tolerance, turn slightly left
   if (distance < desiredDistance - tolerance)
   {
     // Turn slightly left
-    setMotorSpeed(200, 200, true, false); // Adjust motor speed as needed
-    delay(100); // Adjust delay as needed
+    setMotorSpeed(200, 200, true, false);
+    delay(100);
   }
   // If the measured distance is greater than the desired distance plus the tolerance, turn slightly right
   else if (distance > desiredDistance + tolerance)
   {
     // Turn slightly right
-    setMotorSpeed(200, 200, false, true); // Adjust motor speed as needed
-    delay(100); // Adjust delay as needed
+    setMotorSpeed(200, 200, false, true);
+    delay(100);
   }
   // If the measured distance is within the acceptable range, move forward
   else
   {
     // Move forward
-    setMotorSpeed(200, 200, true, true); // Adjust motor speed as needed
-    delay(100); // Adjust delay as needed
+    setMotorSpeed(200, 200, true, true);
+    delay(100);
   }
-
-  /*
-  // Example: move forward at full speed
-  setMotorSpeed(255, 255, true, false);
-  delay(1000); // Wait for 1 second
-  
-  // Example: turn left at half speed
-  setMotorSpeed(127, 127, false, true);
-  delay(1000); // Wait for 1 second
-
-  // Example: stop for 1 second
-  setMotorSpeed(0, 0, true, true);
-  delay(1000); // Wait for 1 second*/
 }
