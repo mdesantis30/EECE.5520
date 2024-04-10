@@ -6,7 +6,7 @@
 #include <arduinoFFT.h>
 
 // Ultrasonic sensor pins
-const int trigPin = 13;
+const int trigPin = 11;
 const int echoPin = 12; // Width of high pulse indicates distance
 
 // Motor control pins: L298N bridge
@@ -39,67 +39,45 @@ void setup()
 // Motor A (speedA and dirA) corresponds to the right motor
 // Motor B (speedB and dirB) correpsonds to the left motor
 // "true" means forward and "false" means backwards
-void setMotorControl(int speedA, int speedB, bool dirA, bool dirB) {
-  // Set motor A direction
-  digitalWrite(in1Pin, dirA ? HIGH : LOW);
-  digitalWrite(in2Pin, !dirA ? HIGH : LOW);
-  // Set motor B direction
+// "duration" defines how long the motors will perform specified action
+void setMotorControl(int speedA, int speedB, bool dirA, bool dirB, int duration) {
+  // Set motor A (right motor) direction
+  digitalWrite(in1Pin, dirA ? LOW : HIGH);
+  digitalWrite(in2Pin, !dirA ? LOW : HIGH);
+  // Set motor B (left motor) direction
   digitalWrite(in3Pin, dirB ?  LOW : HIGH);
   digitalWrite(in4Pin, !dirB ? LOW : HIGH);
-  // Set motor speed
+  // Set motors speed
   analogWrite(enAPin, speedA);
   analogWrite(enBPin, speedB);
+  delay(duration);
 }
 
-// Function to read distance from the ultrasonic sensor , return distance in millimeters
+// Function to read distance from the ultrasonic sensor, returns distance in millimeters
 unsigned int readDistance()
 {
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+  delay(10);
   digitalWrite(trigPin, LOW);
   unsigned long period = pulseIn (echoPin, HIGH); // pulseIn returns time in microseconds (10ˆ−6)
   // 2d = p * 10ˆ−6 s * 343 m/s = p * 0.00343 m = p * 0.343 mm/us
-  return period * 343 / 2000; // Speed of sound in dry air , 20C is 343 m/s
+  return period * 343 / 2000; // Speed of sound in dry air, 20C is 343 m/s
 }
   
 void loop()
 {
+  //********Notes********
+  // Robot successfully circles object but sometimes turns on itself a few times before continuing circling object
   unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
-  unsigned int desiredDistance = 100; // define desired distance from the object (trash can) to 200 mm
-  int motorSpeedA = 150;
-  int motorSpeedB = 150;
-
-  if (distance < 100) // If the measured distance is less than the desired distance minus the tolerance, turn slightly left
+  int motorSpeedA = 100; // set speed of motor A
+  int motorSpeedB = 100; // set speed of motor B
+  
+  if (distance < 80) // If the measured distance is less than the desired distance minus the tolerance, turn slightly left
   {
-    // Turn slightly left to check distance and shape of object being circled
-    setMotorControl(motorSpeedA, motorSpeedB, false, true);
-    /*
-    Serial.print("Car turning left.\n");
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.print("\n");
-    */
+    setMotorControl(motorSpeedA, motorSpeedB, true, false, 300); // Turn slightly left to check distance and shape of object being circled
   }
-  else if (distance > 150) // If the measured distance is greater than the desired distance plus the tolerance, turn slightly right
+  else if (distance > 110) // If the measured distance is greater than the desired distance plus the tolerance, turn slightly right
   {
-    // Turn slightly right
-    setMotorControl(motorSpeedA, motorSpeedB, true, false);
-    /*
-    Serial.print("Car turning right.\n");
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.print("\n");
-    */
-  }
-  else // If the measured distance is within the acceptable range, move forward
-  {
-    // Move forward
-    setMotorControl(motorSpeedA, motorSpeedB, true, true);
-    /*
-    Serial.print("Car moving forward.\n");
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.print("\n");
-    */
+    setMotorControl(motorSpeedA, motorSpeedB, false, true, 300); // Turn slightly right to continue circling object
   }
 }
