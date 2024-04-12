@@ -66,19 +66,18 @@ unsigned int readDistance()
   
 void loop()
 {
-  //********Notes********
-  // Robot successfully circles object but sometimes turns on itself a few times before continuing circling object
-  // Decreased duration from 300 to 180 which almost solved the issue, need to decrease the speed further and test
   unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
-  int motorSpeedA = 100; // set speed of motor A
-  int motorSpeedB = 100; // set speed of motor B
+  int motorSpeedA = 140; // set speed of motor A
+  int motorSpeedB = 140; // set speed of motor B
   
-  if (distance < 120) // If the measured distance is less than the desired distance minus the tolerance, turn slightly left
+  if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
   {
     setMotorControl(motorSpeedA, motorSpeedB, true, false, 180); // Turn slightly left to check distance and shape of object being circled
+    // duration of motors movements in milliseconds defines as 180
   }
-  else if (distance > 150) // If the measured distance is greater than the desired distance plus the tolerance, turn slightly right
+  else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
   {
     setMotorControl(motorSpeedA, motorSpeedB, false, true, 180); // Turn slightly right to continue circling object
+    // duration of motors movements in milliseconds defines as 180
   }
 }
