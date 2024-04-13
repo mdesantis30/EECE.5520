@@ -55,7 +55,7 @@ void setup()
   pinMode(echoPin, INPUT);
   digitalWrite (trigPin, LOW);
   
-  // Configuring motor output pins through the L298N
+  // Configuring motor output pins through the L298N/L293D
   pinMode(enAPin, OUTPUT);
   pinMode(in1Pin, OUTPUT);
   pinMode(in2Pin, OUTPUT);
@@ -127,12 +127,13 @@ void detectPeakFrequency() {
   // Collect samples from the sound sensor
   for (int i = 0; i < SAMPLES; i++) {
     microseconds = micros();
-    vReal[i] = analogRead(micPin);
-    vImag[i] = 0;
-    while (micros() < (microseconds + sampling_period_us)) {}
+    vReal[i] = analogRead(micPin);  // read analog sound signal from the microphone as the real component
+    vImag[i] = 0;  // no imaginary component
+    while (micros() < (microseconds + sampling_period_us)) {}  // continue to detect the peak frequency and monitor the time of the sample 
   }
 
-  // Apply windowing and compute FFT
+  // Apply windowing and compute FFT 
+  // see FFT library example
   FFT.windowing(FFTWindow::Hamming, FFTDirection::Forward);
   FFT.compute(FFTDirection::Forward);
 
@@ -150,7 +151,7 @@ void comparePeakFrequency() {
   /// Check if the peak frequency corresponds to C4 or A4 note
   if (isInRange(peakFrequency, C4_FREQUENCY)) {
     Serial.println("Detected note: C4");
-    // Stop the robot if the detected note is C4
+    // Stop the robot if the detected note is C4 (all motors low)
     stopRobot();
   } 
 
@@ -175,7 +176,7 @@ void comparePeakFrequency() {
   }
   
   else {
-    Serial.println("Unknown note");
+    Serial.println("Unknown note");  // can only read A4 or C4
   }
 
 }
