@@ -1,29 +1,21 @@
-/*
-***Lab 3 EECE5520 Sensors and Actuators
-***Matthew DeSantis and Ryan Mouhib
-***Professor Yan Luo
-***The following code is designed to move a small robot
-***around an obstacle via ultrasonic sensors and DC motors
-***while using sounds (frequencies) to stop and move the robot.
-*/
+// Lab #3: Sensors and Actuators -  Designing a robot car that can drive itself surrounding an object such as a trash can or
+// a one-gallon milk bottle using a robot kit using a distance measurement function to determine the car’s distance from 
+// the nearby object a and then control the movement of the car accordingly.
+// Matthew DeSantis and Ryan Mouhib, EECE.5520
 
-#include <Wire.h>
-// Install new library
-#include "arduinoFFT.h"
-
-// Motor pins
-#define motor1Pin1 5
-#define motor1Pin2 9
-#define motor2Pin1 4
-#define motor2Pin2 8
-
-// Motor PWM speed pins
-#define motor1PWM 7
-#define motor2PWM 6
+#include <arduinoFFT.h>
 
 // Ultrasonic sensor pins
-#define trigPin 12
-#define echoPin 11
+const int trigPin = 12;
+const int echoPin = 11; // Width of high pulse indicates distance
+
+// Motor control pins: L298N bridge
+const int enAPin = 7; // Left motor PWM speed control
+const int in1Pin = 5; // Left motor Direction 1
+const int in2Pin = 9; // Left motor Direction 2
+const int in3Pin = 4; // Right motor Direction 1
+const int in4Pin = 8; // Right motor Direction 2
+const int enBPin = 6; // Right motor PWM speed control
 
 // Analog pin for the sound sensor
 #define soundSensorPin 3 
@@ -56,136 +48,80 @@ const double FREQUENCY_ERROR_MARGIN = 0.02;
 // Create an arduinoFFT object
 ArduinoFFT<double> FFT = ArduinoFFT<double>(vReal, vImag, SAMPLES, SAMPLING_FREQUENCY);
 
-// Function prototypes
-void controlCarMovement();
-int measureDistance();
-void moveForward(int speed);
-void moveBackward(int speed);
-void turnLeft();
-void turnRight();
-void avoidObstacle();
-void detectPeakFrequency();
-void stopRobot();
-void moveRobot();
-void comparePeakFrequency();
-bool isInRange(double frequency, double targetFrequency);
-
-void setup() {
-  // Set motor pins as output
-  pinMode(motor1Pin1, OUTPUT); // HIGH -> spinning the motor forwards
-  pinMode(motor1Pin2, OUTPUT); // LOW -> spinning the motor backwards
-  pinMode(motor2Pin1, OUTPUT); 
-  pinMode(motor2Pin2, OUTPUT); 
-  
-  // Set PWM pins for motor speed control
-  pinMode(motor1PWM, OUTPUT);
-  pinMode(motor2PWM, OUTPUT);
-  
-  // Initialize serial communication
-  Serial.begin(9600);
-  
-  // Set ultrasonic sensor pins
+void setup()
+{
+  // Configuring input/output pins of ultrasonic sensor
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  digitalWrite (trigPin, LOW);
   
-  // Calculate sampling period in microseconds
+  // Configuring motor output pins through the L298N
+  pinMode(enAPin, OUTPUT);
+  pinMode(in1Pin, OUTPUT);
+  pinMode(in2Pin, OUTPUT);
+  pinMode(in3Pin, OUTPUT);
+  pinMode(in4Pin, OUTPUT);
+  pinMode(enBPin, OUTPUT);
+
   sampling_period_us = round(1000000 * (1.0 / SAMPLING_FREQUENCY));
 
+  Serial.begin(9600); // starts the serial communication
 }
 
-void loop() {
-  // Control car movement
-  controlCarMovement();
+void loop()
+{
+  unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
+  int motorSpeedA = 140; // set speed of motor A
+  int motorSpeedB = 140; // set speed of motor B
   
-  // Measure distance using ultrasonic sensor
-  int distance = measureDistance();
-  
-  // If obstacle is detected, avoid it; otherwise, move forward
-  if (distance < 20) {
-    avoidObstacle();
-  } 
-  else {
-    // Move forward at a specified speed
-    moveForward(255); // Full speed
+  if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
+  {
+    setMotorControl(motorSpeedA, motorSpeedB, true, false, 180); // Turn slightly left to check distance and shape of object being circled
+    // duration of motors movements in milliseconds defines as 180
   }
-  
+  else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
+  {
+    setMotorControl(motorSpeedA, motorSpeedB, false, true, 180); // Turn slightly right to continue circling object
+    // duration of motors movements in milliseconds defines as 180
+  }
+
   // Detect peak frequency from sound sensor
   detectPeakFrequency();
   
   // Compare peak frequency with predefined frequencies
   comparePeakFrequency();
+
 }
 
-// Function to control car movement
-void controlCarMovement() {
-  moveForward(255); // Full speed
-  delay(2000);
-  moveBackward(128); // Half speed
-  delay(2000);
-  turnLeft();
-  delay(1000);
-  turnRight();
-  delay(1000);
+// Function to set motor direction and speed
+// Motor A (speedA and dirA) corresponds to the right motor
+// Motor B (speedB and dirB) correpsonds to the left motor
+// "true" means forward and "false" means backwards
+// "duration" defines how long the motors will perform specified action
+void setMotorControl(int speedA, int speedB, bool dirA, bool dirB, int duration) {
+  // Set motor A (right motor) direction
+  digitalWrite(in1Pin, dirA ? LOW : HIGH);
+  digitalWrite(in2Pin, !dirA ? LOW : HIGH);
+  // Set motor B (left motor) direction
+  digitalWrite(in3Pin, dirB ?  LOW : HIGH);
+  digitalWrite(in4Pin, !dirB ? LOW : HIGH);
+  // Set motors speed
+  analogWrite(enAPin, speedA);
+  analogWrite(enBPin, speedB);
+  delay(duration);
 }
 
-// Function to measure distance using ultrasonic sensor
-int measureDistance() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
+// Function to read distance from the ultrasonic sensor, returns distance in millimeters
+unsigned int readDistance()
+{
   digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
+  delay(10);
   digitalWrite(trigPin, LOW);
-  long duration = pulseIn(echoPin, HIGH);
-  // Calculate distance in centimeters
-  int distance = duration * 0.034 / 2;
-  return distance;
+  unsigned long period = pulseIn (echoPin, HIGH); // pulseIn returns time in microseconds (10ˆ−6)
+  // 2d = p * 10ˆ−6 s * 343 m/s = p * 0.00343 m = p * 0.343 mm/us
+  return period * 343 / 2000; // Speed of sound in dry air, 20C is 343 m/s
 }
-
-// Functions to control car movement with speed parameter
-void moveForward(int speed) {
-  digitalWrite(motor1Pin1, HIGH);
-  digitalWrite(motor1Pin2, LOW);
-  digitalWrite(motor2Pin1, HIGH);
-  digitalWrite(motor2Pin2, LOW);
-  analogWrite(motor1PWM, speed); // Set motor 1 speed
-  analogWrite(motor2PWM, speed); // Set motor 2 speed
-}
-
-void moveBackward(int speed) {
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, HIGH);
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
-  analogWrite(motor1PWM, speed); // Set motor 1 speed
-  analogWrite(motor2PWM, speed); // Set motor 2 speed
-}
-
-void turnLeft() {
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, HIGH);
-  digitalWrite(motor2Pin1, HIGH);
-  digitalWrite(motor2Pin2, LOW);
-}
-
-void turnRight() {
-  digitalWrite(motor1Pin1, HIGH);
-  digitalWrite(motor1Pin2, LOW);
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, HIGH);
-}
-
-// Function to avoid obstacle
-void avoidObstacle() {
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, LOW);
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);
-  turnRight();
-  delay(1000);
-  moveForward(200); // Reduced speed to navigate
-  delay(2000);
-}
-
+  
 // Function to detect peak frequency from sound sensor
 void detectPeakFrequency() {
   // Collect samples from the sound sensor
@@ -193,9 +129,7 @@ void detectPeakFrequency() {
     microseconds = micros();
     vReal[i] = analogRead(micPin);
     vImag[i] = 0;
-    while (micros() < (microseconds + sampling_period_us)) {
-
-    }
+    while (micros() < (microseconds + sampling_period_us)) {}
   }
 
   // Apply windowing and compute FFT
@@ -219,30 +153,31 @@ void comparePeakFrequency() {
     // Stop the robot if the detected note is C4
     stopRobot();
   } 
+
   else if (isInRange(peakFrequency, A4_FREQUENCY)) {
     Serial.println("Detected note: A4");
+
+    unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
+    int motorSpeedA = 140; // set speed of motor A
+    int motorSpeedB = 140; // set speed of motor B
+    
     // Move the robot if the detected note is A4
-    moveRobot();
-  } 
+    if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
+    {
+      setMotorControl(motorSpeedA, motorSpeedB, true, false, 180); // Turn slightly left to check distance and shape of object being circled
+      // duration of motors movements in milliseconds defines as 180
+    }
+    else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
+    {
+      setMotorControl(motorSpeedA, motorSpeedB, false, true, 180); // Turn slightly right to continue circling object
+      // duration of motors movements in milliseconds defines as 180
+    }
+  }
+  
   else {
     Serial.println("Unknown note");
   }
-  // Delay for readability
-  delay(1000);
-}
 
-// Function to stop the robot
-void stopRobot() {
-  digitalWrite(motor1Pin1, LOW);
-  digitalWrite(motor1Pin2, LOW);
-  digitalWrite(motor2Pin1, LOW);
-  digitalWrite(motor2Pin2, LOW);
-}
-
-// Function to move the robot
-void moveRobot() {
-  // Move forward at full speed
-  moveForward(255);
 }
 
 // Function to check if a frequency is within a certain range
@@ -252,4 +187,12 @@ bool isInRange(double frequency, double targetFrequency) {
   double upperBound = targetFrequency + (targetFrequency * FREQUENCY_ERROR_MARGIN);
   // Check if the frequency is within the range
   return (frequency >= lowerBound && frequency <= upperBound);
+}
+
+// Function to stop the robot
+void stopRobot() {
+  digitalWrite(in1Pin, LOW);
+  digitalWrite(in2Pin, LOW);
+  digitalWrite(in3Pin, LOW);
+  digitalWrite(in4Pin, LOW);
 }
