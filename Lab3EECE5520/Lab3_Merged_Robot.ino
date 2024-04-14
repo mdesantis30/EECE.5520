@@ -75,6 +75,13 @@ unsigned int readDistance()
   return period * 343 / 2000; // Speed of sound in dry air, 20C is 343 m/s
 }
   
+enum State {
+  CIRCLING,
+  STOPPED
+};
+
+State currentState = CIRCLING;
+
 void loop()
 {
   double vReal[SAMPLES]; // Array to store real values
@@ -84,14 +91,13 @@ void loop()
 
   unsigned long detectionStartTime = millis(); // Timestamp when detection starts
 
-  
-  int motorSpeedA = 100; // set speed of motor A
-  int motorSpeedB = 100; // set speed of motor B
+  int motorSpeedA = 80; // set speed of motor A
+  int motorSpeedB = 80; // set speed of motor B
 
   while (millis() - detectionStartTime < DETECTION_WINDOW)
   {
     unsigned int distance = readDistance(); // read distance from the ultrasonic sensor
-    
+
     // Read analog values from sound sensor
     for (int i = 0; i < SAMPLES; i++)
     {
@@ -115,6 +121,18 @@ void loop()
       peakSum += peak;
       peakCount++;
     }
+
+    // Adjust motor movement based on distance
+    if (currentState == CIRCLING) {
+      if (distance < 110) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
+      {
+        setMotorControl(motorSpeedA, motorSpeedB, true, false, 140); // Turn slightly left to check distance and shape of object being circled
+      }
+      else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
+      {
+        setMotorControl(motorSpeedA, motorSpeedB, false, true, 140); // Turn slightly right to continue circling object
+      }
+    }
   }
 
   // Calculate average peak frequency
@@ -123,35 +141,22 @@ void loop()
   // Determine if the tone is A4 or C4 based on average peak frequency
   if (averagePeak > 431 && averagePeak < 449)
   {
-    unsigned int distance = readDistance();  // read distance from the ultrasonic sensor
-    if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
-    {
-      setMotorControl(motorSpeedA, motorSpeedB, true, false, 100); // Turn slightly left to check distance and shape of object being circled
-      // duration of motors movements in milliseconds defines as 100
-    }
-    else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
-    {
-      setMotorControl(motorSpeedA, motorSpeedB, false, true, 100); // Turn slightly right to continue circling object
-      // duration of motors movements in milliseconds defines as 100
-      //distance = readDistance(); // read distance from the ultrasonic sensor
-    }
     Serial.print("A4 note detected at average peak frequency: ");
     Serial.print(averagePeak, 1);
     Serial.println(" Hz.");
+    currentState = CIRCLING; // Set state to circling
   }
   else if (averagePeak > 257 && averagePeak < 267)
   {
-    // C4 note detected turn off motors
-    // Turn off motor A (right motor)
-    digitalWrite(in1Pin, true ? LOW : LOW);
-    digitalWrite(in2Pin, !true ? LOW : LOW);
-    // Turn off motor B (left motor)
-    digitalWrite(in3Pin, true ?  LOW : LOW);
-    digitalWrite(in4Pin, !true ? LOW : LOW);
+    // C4 note detected, stop motors
+    digitalWrite(in1Pin, LOW);
+    digitalWrite(in2Pin, LOW);
+    digitalWrite(in3Pin, LOW);
+    digitalWrite(in4Pin, LOW);
 
     Serial.print("C4 note detected at average peak frequency: ");
     Serial.print(averagePeak, 1);
     Serial.println(" Hz.");
+    currentState = STOPPED; // Set state to stopped
   }
-  
 }
