@@ -91,8 +91,8 @@ void loop()
 
   unsigned long detectionStartTime = millis(); // Timestamp when detection starts
 
-  int motorSpeedA = 80; // set speed of motor A
-  int motorSpeedB = 80; // set speed of motor B
+  int motorSpeedA = 100; // set speed of motor A
+  int motorSpeedB = 100; // set speed of motor B
 
   while (millis() - detectionStartTime < DETECTION_WINDOW)
   {
@@ -124,13 +124,13 @@ void loop()
 
     // Adjust motor movement based on distance
     if (currentState == CIRCLING) {
-      if (distance < 110) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
+      if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
       {
-        setMotorControl(motorSpeedA, motorSpeedB, true, false, 140); // Turn slightly left to check distance and shape of object being circled
+        setMotorControl(motorSpeedA, motorSpeedB, true, false, 180); // Turn slightly left to check distance and shape of object being circled
       }
       else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
       {
-        setMotorControl(motorSpeedA, motorSpeedB, false, true, 140); // Turn slightly right to continue circling object
+        setMotorControl(motorSpeedA, motorSpeedB, false, true, 180); // Turn slightly right to continue circling object
       }
     }
   }
