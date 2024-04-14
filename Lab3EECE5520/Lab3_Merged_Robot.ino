@@ -51,13 +51,26 @@ void setup()
 // Motor B (speedB and dirB) correpsonds to the left motor
 // "true" means forward and "false" means backwards
 // "duration" defines how long the motors will perform specified action
-void setMotorControl(int speedA, int speedB, bool dirA, bool dirB, int duration) {
+void setMotorControl(int speedA, int speedB, bool dirA, bool dirB, int duration)
+{
+  if (speedA == 0)
+  {
+  // Set motor A (right motor) direction
+  digitalWrite(in1Pin, dirA ? LOW : LOW);
+  digitalWrite(in2Pin, !dirA ? LOW : LOW);
+  // Set motor B (left motor) direction
+  digitalWrite(in3Pin, dirB ?  LOW : HIGH);
+  digitalWrite(in4Pin, !dirB ? LOW : HIGH);
+  }
+  else if (speedB == 0)
+  {
   // Set motor A (right motor) direction
   digitalWrite(in1Pin, dirA ? LOW : HIGH);
   digitalWrite(in2Pin, !dirA ? LOW : HIGH);
   // Set motor B (left motor) direction
-  digitalWrite(in3Pin, dirB ?  LOW : HIGH);
-  digitalWrite(in4Pin, !dirB ? LOW : HIGH);
+  digitalWrite(in3Pin, dirB ?  LOW : LOW);
+  digitalWrite(in4Pin, !dirB ? LOW : LOW);
+  }
   // Set motors speed
   analogWrite(enAPin, speedA);
   analogWrite(enBPin, speedB);
@@ -75,7 +88,8 @@ unsigned int readDistance()
   return period * 343 / 2000; // Speed of sound in dry air, 20C is 343 m/s
 }
   
-enum State {
+enum State
+{
   CIRCLING,
   STOPPED
 };
@@ -126,11 +140,11 @@ void loop()
     if (currentState == CIRCLING) {
       if (distance < 120) // If the measured distance is less than the desired distance: 120 mm, turn slightly left
       {
-        setMotorControl(motorSpeedA, motorSpeedB, true, false, 180); // Turn slightly left to check distance and shape of object being circled
+        setMotorControl(motorSpeedA, 0, true, false, 100); // Turn slightly left to check distance and shape of object being circled
       }
       else if (distance > 150) // If the measured distance is greater than the desired distance: 150 mm, turn slightly right
       {
-        setMotorControl(motorSpeedA, motorSpeedB, false, true, 180); // Turn slightly right to continue circling object
+        setMotorControl(0, motorSpeedB, false, true, 100); // Turn slightly right to continue circling object
       }
     }
   }
